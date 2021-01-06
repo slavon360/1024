@@ -1,0 +1,15 @@
+.desk-component-wrapper {
+	.static-cells {
+		padding: 15px;
+		cursor: default;
+		background: #bbada0;
+		border-radius: 6px;
+		width: 500px;
+		height: 500px;
+		box-sizing: border-box;
+		.cells-container {
+			position: relative;
+			overflow: hidden;
+		}
+	}
+}
