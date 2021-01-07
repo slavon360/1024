@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
 import Desk from './components/Desk/Desk';
-import './App.scss';
+import './app-styles.scss';
 
 const cellsQuantity = 16;
 const rowAndColumnsMaxNumber = Math.sqrt(16);
@@ -23,21 +23,34 @@ const initStaticCells = quantity => [...Array(quantity).keys()];
 const initDynamicCells = (quantity, dynamicCellsNumber = 2) => {
 	const rowAndColumnsMaxNumber = Math.sqrt(quantity);
 	const nums = [];
-	const cells = [...Array(dynamicCellsNumber).keys()].map(() => ({
-		value: 2,
-		rowNumber: getRandomInt(rowAndColumnsMaxNumber, nums),
-		colNumber: getRandomInt(rowAndColumnsMaxNumber, nums),
-		isNew: false
-	}));
+	const cells = [...Array(dynamicCellsNumber).keys()].map(() => {
+		const rowNumber = getRandomInt(rowAndColumnsMaxNumber, nums);
+		const colNumber = getRandomInt(rowAndColumnsMaxNumber, nums);
+
+		return {
+			value: 2,
+			rowNumber,
+			colNumber,
+			prevRowNumber: rowNumber,
+			prevColNumber: colNumber,
+			isNew: false,
+			merged: false
+		}
+	});
 
 	return cells;
 };
 const addNewRandomCell = cells => {
+	const rowNumber = Math.ceil(Math.random() * Math.floor(rowAndColumnsMaxNumber));
+	const colNumber = Math.ceil(Math.random() * Math.floor(rowAndColumnsMaxNumber));
 	const newCell = {
 		value: 2,
-		rowNumber: Math.ceil(Math.random() * Math.floor(rowAndColumnsMaxNumber)),
-		colNumber: Math.ceil(Math.random() * Math.floor(rowAndColumnsMaxNumber)),
-		isNew: true
+		rowNumber,
+		colNumber,
+		prevRowNumber: rowNumber,
+		prevColNumber: colNumber,
+		isNew: true,
+		merged: false
 	};
 
 	const notConvenient = cells.find(cell => cell.rowNumber === newCell.rowNumber && cell.colNumber === newCell.colNumber);
@@ -52,11 +65,8 @@ const addNewRandomCell = cells => {
 const App = () => {
 	const staticCells = initStaticCells(cellsQuantity);
 	const [dynamicCells, setDynamicCells] = useState(() => initDynamicCells(cellsQuantity));
-	// const [previousDirection, setPreviousDirection] = useState(null);
-	// const [allowNextMove, setAllowNextMove] = useState(true);
 
 	const changeCellsPosition = (direction, cells) => {
-		console.log(direction);
 		switch (direction) {
 			case 38:
 				return directionsHandler(UP, cells, true);
@@ -85,38 +95,32 @@ const App = () => {
 
 		return isSame;
 	}
-	// const recalculateHandler = (callback, previousData, direction) => {
-	// 	if ((allowNextMove && direction === previousDirection) || direction !== previousDirection) {
-	// 		return callback.apply(null, [direction,previousData]);
-	// 	} else {
-	// 		return previousData;
-	// 	}
-	// }
+
 	const directionsHandler = (direction, cells, vertical) => {
-		// setAllowNextMove(false);
 		let updatedCells = [];
 		const coord = vertical ? 'rowNumber' : 'colNumber';
 		const rearrangeCells = (cells, numberToBegin) => {
-			return cells.map(cell => ({
+			return cells.map((cell, index) => ({
 				...cell,
-				[coord]: direction === UP || direction === LEFT ? numberToBegin++ : numberToBegin--
+				[coord]: direction === UP || direction === LEFT ?
+				!cell.toRemove ? numberToBegin++ : cells[index-1][coord] :
+				!cell.toRemove ? numberToBegin-- : cells[index-1][coord]
 			}));
 		}
 	
 		[...Array(rowAndColumnsMaxNumber).keys()].forEach(number => {
 			const filteredByColOrRow = cells.filter(cell => vertical ? cell.colNumber === (number + 1) : cell.rowNumber === (number + 1));
 			let sortedCells = filteredByColOrRow.sort((a, b) => parseInt(a[coord]) - parseInt(b[coord]));
+			sortedCells = sortedCells.filter(cell => !cell.toRemove);
 			sortedCells = direction === UP || direction === LEFT ? sortedCells : sortedCells.reverse();
 			let numberToBegin = direction === UP || direction === LEFT ? 1 : rowAndColumnsMaxNumber;
 	
 			sortedCells = checkForSameValues(sortedCells);
-			sortedCells = sortedCells.filter(cell => !cell.toRemove);
 			sortedCells = rearrangeCells(sortedCells, numberToBegin);
 			updatedCells = [ ...updatedCells, ...sortedCells ];
 		});
 	
 		updatedCells = isSameCells(cells, updatedCells) ? cells : addNewRandomCell(updatedCells);
-		// setPreviousDirection(direction);
 
 		return updatedCells;
 	};
@@ -124,16 +128,27 @@ const App = () => {
 		...cell,
 		isNew: false
 	});
+	const removeMergedFlag = cell => ({
+		...cell,
+		merged: false
+	});
+	const setPreviousCoordinates = cell => ({
+		...cell,
+		prevRowNumber: cell.rowNumber,
+		prevColNumber: cell.colNumber
+	});
 	const checkForSameValues = cells => {
 		return cells.map((cell, index) => {
 			const nextCell = cells[index + 1];
 
+			cell = setPreviousCoordinates(cell);
 			cell = removeNewFlag(cell);
+			cell = removeMergedFlag(cell);
 	
 			if (nextCell && nextCell.value === cell.value) {
-				nextCell.toRemove = true;
-				// setAllowNextMove(true);
-				return { ...cell, value: cell.value * 2 };
+				nextCell.toRemove = !cell.toRemove;
+
+				return { ...cell, value: cell.value * 2, merged: true };
 			} else {
 				return cell;
 			}
@@ -144,9 +159,9 @@ const App = () => {
 		setDynamicCells(prevCells => changeCellsPosition(event.keyCode, prevCells));
 	}, []);
 
-	useEffect(() => {
-		console.log('use effect: ', dynamicCells);
-	}, [dynamicCells]);
+	// useEffect(() => {
+	// 	console.log('use effect: ', dynamicCells);
+	// }, [dynamicCells]);
 
 	useEffect(() => {
 		window.addEventListener('keydown', handleUserKeyPress);

@@ -1,7 +1,9 @@
+@import '../../variables.module.scss';
+
 .cell-component-wrapper {
-    width: 106.25px;
-    height: 106.25px;
-    margin: 0 15px 15px 0;
+    width: $cell-width-height;
+    height: $cell-width-height;
+    margin: 0 $cell-margin-right $cell-margin-bottom 0;
     float: left;
     border-radius: 3px;
     background: rgba(238, 228, 218, 0.35);

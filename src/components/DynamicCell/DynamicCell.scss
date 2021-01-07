@@ -1,4 +1,4 @@
-@import '../../variables.scss';
+@import '../../variables.module.scss';
 
 .dynamic-cell-component {
     position: absolute;
@@ -11,10 +11,14 @@
     width: $cell-width-height;
     height: $cell-width-height;
     line-height: 116.25px;
+    transition: 250ms ease-in-out;
 }
 .new-dynamic-cell {
   animation: appear 200ms ease 100ms;
   animation-fill-mode: both;
+}
+.dynamic-cell-merged {
+  animation: pop 300ms ease 100ms;
 }
 
 @keyframes appear {
@@ -28,4 +32,21 @@
       transform: scale(1);
       transform: scale(1);
     }
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(0);
+    transform: scale(0);
+  }
+
+  50% {
+    transform: scale(1.2);
+    transform: scale(1.2);
+  }
+
+  100% {
+    transform: scale(1);
+    transform: scale(1); 
+  }
 }

@@ -1,0 +1,17 @@
+@function strip-unit($number) {
+    @if type-of($number) == 'number' and not unitless($number) {
+      @return $number / ($number * 0 + 1);
+    }
+  
+    @return $number;
+}
+
+$cell-width-height: 106.25px;
+$cell-margin-right: 15px;
+$cell-margin-bottom: 15px;
+
+:export {
+    cellWidthHeight: strip-unit($cell-width-height);
+    cellMarginBottom: strip-unit($cell-margin-bottom);
+    cellMarginRight: strip-unit($cell-margin-right);
+}

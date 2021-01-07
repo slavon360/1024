@@ -22,11 +22,15 @@ const DeskComponent = ({ dynamicCells, staticCells, rowAndColumnsMaxNumber }) =>
 					})}
 					{dynamicCells.map((cell, index) => (
 						<DynamicCell
-							key={cell.rowNumber + '-' + index}
+							key={`${cell.rowNumber}-${cell.colNumber}-${index}`}
 							rowNumber={cell.rowNumber}
 							colNumber={cell.colNumber}
+							prevRowNumber={cell.prevRowNumber}
+							prevColNumber={cell.prevColNumber}
 							value={cell.value}
 							isNew={cell.isNew}
+							toRemove={cell.toRemove}
+							merged={cell.merged}
 						/>))}
 				</div>
 			</div>
