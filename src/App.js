@@ -46,7 +46,7 @@ const App = () => {
 	let currentScore = 0;
 	const staticCells = initStaticCells(cellsQuantity);
 	const [dynamicCells, setDynamicCells] = useState(() => initDynamicCells(cellsQuantity));
-	const [scores, setScore] = useState({ prevScore: 0, currentScore: 0 });
+	const [scores, setScore] = useState({ prevScore: 0, currentScore: 0, addedAmount: 0 });
 
 	const addNewRandomCell = cells => {
 		const rowNumber = Math.ceil(Math.random() * Math.floor(rowAndColumnsMaxNumber));
@@ -166,7 +166,7 @@ const App = () => {
 		setDynamicCells(prevCells => changeCellsPosition(event.keyCode, prevCells));
 		setScore(prevScores => {
 			
-			return { prevScore: currentScore - prevScores.currentScore, currentScore };
+			return { prevScore: prevScores.currentScore,  addedAmount: currentScore - prevScores.currentScore, currentScore };
 		});
 	}, []);
 
@@ -184,7 +184,7 @@ const App = () => {
 
 	return (
 		<div className="App">
-			<Card score={scores.currentScore} addedAmount={scores.prevScore} />
+			<Card score={scores.currentScore} addedAmount={scores.addedAmount} prevScore={scores.prevScore} />
 			<Desk
 				staticCells={staticCells}
 				dynamicCells={dynamicCells}

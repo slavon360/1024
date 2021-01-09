@@ -1,18 +1,40 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import cx from 'classnames';
 
 import './Card.scss';
 
-const Card = ({score, addedAmount}) => {
-	// const [amount, setAmount] = useState(addedAmount);
-
+function usePrevious(value) {
+	const ref = useRef();
 	useEffect(() => {
-		console.log('addedAmount: ', addedAmount);
-	}, [addedAmount]);
+	  ref.current = value;
+	});
+	console.log(value);
+	return ref.current;
+}
+
+const Card = ({score, addedAmount, prevScore}) => {
+	const additionNode = useRef(null);
+	// const [amount, setAmount] = useState(addedAmount);
+	// const prevAmount = usePrevious(addedAmount);
+	// useEffect(() => {
+	// 	setAmount(amount => addedAmount);
+	// }, [addedAmount]);
+	if (additionNode && additionNode.current) {
+		console.log(additionNode.current.className);
+	}
 	return (
-		<div className="score-container">{score}
-			<div className={cx('score-addition', { 'switched': addedAmount })}>+{addedAmount}</div>
-		</div>);
+		<div>
+			{/* <div>prevAmount: {prevAmount}; addedAmount: {addedAmount}</div> */}
+			<div className="score-container">{score}
+				<div ref={additionNode} className={cx('score-addition', {
+					'repeatedly-added': addedAmount && additionNode.current.className.includes('added-amount'),
+					// 'same-added': addedAmount && prevAmount === addedAmount,
+					'added-amount': addedAmount && additionNode.current.className.includes('repeatedly-added')
+				})}>+{addedAmount}</div>
+			</div>
+			{/* <div>{additionNode.current}</div> */}
+		</div>
+	);
 };
 
 export default Card;
