@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
 import Desk from './components/Desk/Desk';
+import Card from './components/Card/Card';
 import './app-styles.scss';
 
 const cellsQuantity = 16;
@@ -40,31 +41,34 @@ const initDynamicCells = (quantity, dynamicCellsNumber = 2) => {
 
 	return cells;
 };
-const addNewRandomCell = cells => {
-	const rowNumber = Math.ceil(Math.random() * Math.floor(rowAndColumnsMaxNumber));
-	const colNumber = Math.ceil(Math.random() * Math.floor(rowAndColumnsMaxNumber));
-	const newCell = {
-		value: 2,
-		rowNumber,
-		colNumber,
-		prevRowNumber: rowNumber,
-		prevColNumber: colNumber,
-		isNew: true,
-		merged: false
-	};
-
-	const notConvenient = cells.find(cell => cell.rowNumber === newCell.rowNumber && cell.colNumber === newCell.colNumber);
-
-	if (!notConvenient) {
-		return [...cells, newCell];
-	} else {
-		return addNewRandomCell(cells);
-	}
-}
 
 const App = () => {
+	let currentScore = 0;
 	const staticCells = initStaticCells(cellsQuantity);
 	const [dynamicCells, setDynamicCells] = useState(() => initDynamicCells(cellsQuantity));
+	const [scores, setScore] = useState({ prevScore: 0, currentScore: 0, addedAmount: 0 });
+
+	const addNewRandomCell = cells => {
+		const rowNumber = Math.ceil(Math.random() * Math.floor(rowAndColumnsMaxNumber));
+		const colNumber = Math.ceil(Math.random() * Math.floor(rowAndColumnsMaxNumber));
+		const newCell = {
+			value: currentScore && !(currentScore % 50) ? 4 : 2,
+			rowNumber,
+			colNumber,
+			prevRowNumber: rowNumber,
+			prevColNumber: colNumber,
+			isNew: true,
+			merged: false
+		};
+	
+		const notConvenient = cells.find(cell => cell.rowNumber === newCell.rowNumber && cell.colNumber === newCell.colNumber);
+	
+		if (!notConvenient) {
+			return [...cells, newCell];
+		} else {
+			return addNewRandomCell(cells);
+		}
+	}
 
 	const changeCellsPosition = (direction, cells) => {
 		switch (direction) {
@@ -146,9 +150,12 @@ const App = () => {
 			cell = removeMergedFlag(cell);
 	
 			if (nextCell && nextCell.value === cell.value) {
+				const value = cell.value * 2;
 				nextCell.toRemove = !cell.toRemove;
 
-				return { ...cell, value: cell.value * 2, merged: true };
+				currentScore += value;
+
+				return { ...cell, value, merged: true };
 			} else {
 				return cell;
 			}
@@ -157,11 +164,15 @@ const App = () => {
 
 	const handleUserKeyPress = useCallback(event => {
 		setDynamicCells(prevCells => changeCellsPosition(event.keyCode, prevCells));
+		setScore(prevScores => {
+			
+			return { prevScore: prevScores.currentScore,  addedAmount: currentScore - prevScores.currentScore, currentScore };
+		});
 	}, []);
 
 	// useEffect(() => {
-	// 	console.log('use effect: ', dynamicCells);
-	// }, [dynamicCells]);
+	// 	console.log('score: ', score, 'currentScore: ', currentScore);
+	// }, [score, currentScore]);
 
 	useEffect(() => {
 		window.addEventListener('keydown', handleUserKeyPress);
@@ -173,6 +184,7 @@ const App = () => {
 
 	return (
 		<div className="App">
+			<Card score={scores.currentScore} addedAmount={scores.addedAmount} prevScore={scores.prevScore} />
 			<Desk
 				staticCells={staticCells}
 				dynamicCells={dynamicCells}
