@@ -184,7 +184,7 @@ const App = () => {
 
 	return (
 		<div className="App">
-			<Card score={scores.currentScore} addedAmount={scores.addedAmount} prevScore={scores.prevScore} />
+			<Card score={scores.currentScore} addedAmount={scores.addedAmount}/>
 			<Desk
 				staticCells={staticCells}
 				dynamicCells={dynamicCells}
