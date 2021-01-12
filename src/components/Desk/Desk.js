@@ -5,10 +5,18 @@ import DynamicCell from '../DynamicCell/DynamicCell';
 
 import './Desk.scss';
 
-const DeskComponent = ({ dynamicCells, staticCells, rowAndColumnsMaxNumber }) => {
+const DeskComponent = ({ dynamicCells, staticCells, rowAndColumnsMaxNumber, gameOver }) => {
 	return (
 		<div className="desk-component-wrapper">
 			<div className="static-cells">
+				{gameOver &&
+					<div className="game-over">
+						<p>Game over!</p>
+						<div className="lower">
+							<a className="retry-button">Try again</a>
+						</div>
+					</div>
+				}
 				<div className="cells-container">
 					{staticCells.map(cell_index => {
 						let styles = (cell_index + 1) % rowAndColumnsMaxNumber === 0 ? { marginRight: 0 } : {};

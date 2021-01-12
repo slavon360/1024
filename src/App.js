@@ -44,11 +44,18 @@ const initDynamicCells = (quantity, dynamicCellsNumber = 2) => {
 
 const App = () => {
 	let currentScore = 0;
+	let amountToAdd = 0;
 	const staticCells = initStaticCells(cellsQuantity);
 	const [dynamicCells, setDynamicCells] = useState(() => initDynamicCells(cellsQuantity));
 	const [scores, setScore] = useState({ prevScore: 0, currentScore: 0, addedAmount: 0 });
+	const [gameOver, setGameOver] = useState(false);
 
 	const addNewRandomCell = cells => {
+		if (cellsQuantity === cells.length) {
+			// setGameOver(true);
+
+			return cells;
+		}
 		const rowNumber = Math.ceil(Math.random() * Math.floor(rowAndColumnsMaxNumber));
 		const colNumber = Math.ceil(Math.random() * Math.floor(rowAndColumnsMaxNumber));
 		const newCell = {
@@ -70,7 +77,36 @@ const App = () => {
 		}
 	}
 
+	const checkIfNoMoreMovesLeft = cells => {
+		directionsHandler(UP, cells, true);
+		directionsHandler(DOWN, cells, true);
+		directionsHandler(RIGHT, cells);
+		directionsHandler(LEFT, cells);
+
+		const gameOver = !amountToAdd;
+		setGameOver(gameOver);
+
+		currentScore -= amountToAdd;
+
+		return gameOver;
+	}
+
 	const changeCellsPosition = (direction, cells) => {
+		let noMovesLeft = false;
+		amountToAdd = 0;
+
+		if (cells.length >= cellsQuantity) {
+			let copyCells = JSON.parse(JSON.stringify(cells));
+
+			copyCells = copyCells.filter(cell => !cell.toRemove);
+
+			noMovesLeft = copyCells.length === cellsQuantity ? checkIfNoMoreMovesLeft(copyCells) : false;
+		}
+
+		if (noMovesLeft) {
+			return cells;
+		}
+
 		switch (direction) {
 			case 38:
 				return directionsHandler(UP, cells, true);
@@ -124,7 +160,7 @@ const App = () => {
 			updatedCells = [ ...updatedCells, ...sortedCells ];
 		});
 	
-		updatedCells = isSameCells(cells, updatedCells) ? cells : addNewRandomCell(updatedCells);
+		updatedCells = isSameCells(cells, updatedCells) ? updatedCells : addNewRandomCell(updatedCells);
 
 		return updatedCells;
 	};
@@ -154,6 +190,7 @@ const App = () => {
 				nextCell.toRemove = !cell.toRemove;
 
 				currentScore += value;
+				amountToAdd += value;
 
 				return { ...cell, value, merged: true };
 			} else {
@@ -189,6 +226,7 @@ const App = () => {
 				staticCells={staticCells}
 				dynamicCells={dynamicCells}
 				rowAndColumnsMaxNumber={rowAndColumnsMaxNumber}
+				gameOver={gameOver}
 			/>
 		</div>
 	);
